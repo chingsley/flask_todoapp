@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import sys
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://kingsleyeneja:chinonxo@localhost:5432/flask_todoapp'
@@ -19,15 +20,26 @@ db.create_all()
 
 @app.route('/todos/create', methods=['POST'])
 def create_todo():
-  # description = request.form.get('description', '')
-  description = request.get_json()['description']
-  todo  = Todo(description=description)
-  db.session.add(todo)
-  db.session.commit()
-  return jsonify({
-    'description': todo.description
-  })
-  # return redirect(url_for('index')) # the 'index' here refers to the controller method (def index) defined below. It doesn't not refer to the index.html file
+  error = False
+  response_body = {}
+  try:
+    # description = request.form.get('description', '')
+    description = request.get_json()['description']
+    todo  = Todo(description=description)
+    db.session.add(todo)
+    db.session.commit()
+    response_body = { 'description': todo.description}
+    # return redirect(url_for('index')) # the 'index' here refers to the controller method (def index) defined below. It doesn't not refer to the index.html file
+  except:
+    error = True
+    db.session.rollback()
+    print(sys.exc_info())
+  finally:
+    db.session.close()
+  if not error:
+    return jsonify(response_body)
+
+
 
 
 @app.route('/')
