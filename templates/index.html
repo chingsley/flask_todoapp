@@ -12,6 +12,20 @@
         list-style: none;
         padding: 0;
         margin: 0;
+        width: 200px;
+      }
+      li {
+        clear: both;
+      }
+      li button {
+        -webkit-appearance: none;
+        border: none;
+        outline: none;
+        color: red;
+        float: right;
+        cursor: pointer;
+        font-size: 20px;
+        background: none;
       }
     </style>
   </head>
@@ -37,10 +51,12 @@
           endif
           %}
         />{{d.description}}
+        <button data-id="{{ d.id }}" class="btn-delete-item">&cross;</button>
       </li>
       {% endfor %}
     </ul>
     <script>
+      /* Toggle item status (complete/not complete) */
       const checkboxes = document.querySelectorAll(".check-completed");
       for (let i = 0; i < checkboxes.length; i++) {
         const checkbox = checkboxes[i];
@@ -63,6 +79,8 @@
             });
         };
       }
+
+      /* create new to item */
       document.getElementById("form").onsubmit = function (e) {
         e.preventDefault();
         fetch("/todos/create", {
@@ -81,6 +99,7 @@
             console.log(jsonResponse);
             const liItem = document.createElement("LI");
             liItem.innerHTML = jsonResponse["description"];
+            // const checkBox = document.createElement('')
             document.getElementById("todos").appendChild(liItem);
             document.getElementById("error").className = "hidden";
           })
@@ -89,6 +108,34 @@
             document.getElementById("error").className = "";
           });
       };
+
+      /* Delete item */
+      const btns = document.querySelectorAll(".btn-delete-item");
+      for (let i = 0; i < btns.length; i++) {
+        const btn = btns[i];
+        btn.onclick = function (e) {
+          console.log("event", e);
+          const status = e.target.checked;
+          const itemId = e.target.dataset.id;
+          console.log(itemId);
+          // fetch(`/todos/${itemId}/delete`, {
+          //   method: "DELETE",
+          //   body: "",
+          //   headers: { "Content-Type": "application/json" },
+          // })
+          fetch(`/todos/${itemId}/delete`, {
+            method: "DELETE",
+          })
+            .then(function (response) {
+              console.log(response);
+              document.getElementById("error").className = "hidden";
+            })
+            .catch(function (error) {
+              console.log(error);
+              document.getElementById("error").className = "";
+            });
+        };
+      }
     </script>
   </body>
 </html>
