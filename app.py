@@ -77,6 +77,12 @@ def delete_todo(item_id):
 
 
 
+@app.route('/lists/<list_id>')
+def get_list_todos(list_id):
+    return render_template('index.html', data=Todo.query.filter_by(list_id=list_id).order_by('id').all())
+
+
+
 @app.route('/')
 def index():
-    return render_template('index.html', data=Todo.query.order_by('id').all())
+  return redirect(url_for('get_list_todos', list_id=1))
